@@ -57,7 +57,8 @@ package QualityFarming
 			return parent::clientCmdCenterprint(%message, %time);
 
 		%message = QualityFarming_parseToolIDString(%message);
-		if(%message $= "" || (stripos(%message, "<just:left>") == -1 && stripos(%message, "<just:right>") == -1))
+		%isJustCenter = (stripos(%message, "<just:left>") == -1 && stripos(%message, "<just:right>") == -1);
+		if(%message $= "" || %isJustCenter)
 			clientCmdClearFarmingPrint();
 		
 		%firstLine = StripMLControlChars(getRecord(strreplace(%message, "<br>", "\n"), 0));
@@ -66,9 +67,14 @@ package QualityFarming
 			|| %firstLine $= "Silo "
 			|| %firstLine $= "Cargo Jeep ")
 		{
+			if($LastCenterprintIsJustCenter)
+				clientCmdClearCenterprint();
+			
 			clientCmdFarmingPrint(%message, %time);
 			return;
 		}
+
+		$LastCenterprintIsJustCenter = %isJustCenter;
 		
 		parent::clientCmdCenterprint(%message, %time);
 	}
