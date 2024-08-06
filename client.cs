@@ -57,7 +57,10 @@ package QualityFarming
 			clientCmdClearFarmingPrint();
 		
 		%firstLine = StripMLControlChars(getRecord(strreplace(%message, "<br>", "\n"), 0));
-		if(%firstLine $= "Toolbox " || %firstLine $= "Storage Crate " || %firstLine $= "Silo ")
+		if(    %firstLine $= "Toolbox "
+			|| %firstLine $= "Storage Crate "
+			|| %firstLine $= "Silo "
+			|| %firstLine $= "Cargo Jeep ")
 		{
 			clientCmdFarmingPrint(%message, %time);
 			return;
