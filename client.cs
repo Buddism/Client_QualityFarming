@@ -140,13 +140,13 @@ function QualityFarming_setIDName(%data)
 	$QualityFarming::ToolData[%toolID, "name"] = %name;
 	newChatHud_AddLine("\c6QualityFarming: Named ["@ %toolID @"] to '"@ %name @"'");
 }
-function QualityFarming_getToolIndex(%toolID)
+function QualityFarming_getToolIndex(%testToolID)
 {
 	for(%i = 0; %i < $QualityFarming::ToolDataCount; %i++)
 	{
 		%toolID = $QualityFarming::ToolDataIndex[%i];
-		if(%toolID $= %toolID)
-			return %toolID;
+		if(%testToolID $= %toolID)
+			return %i;
 	}
 
 	return -1;
@@ -170,7 +170,7 @@ function QualityFarming_listBoundIDs(%search)
 	{
 		%toolID = $QualityFarming::ToolDataIndex[%i];
 
-		newChatHud_AddLine("\c6  <tab:200>["@ %toolID @"]:\t\c6 "@ $QualityFarming::ToolData[%toolID, "name"]);
+		newChatHud_AddLine("  \c3["@ %toolID @"]:\t\c6 "@ $QualityFarming::ToolData[%toolID, "name"]);
 	}
 }
 
