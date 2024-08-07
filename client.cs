@@ -54,9 +54,16 @@ package QualityFarming
 		if(!$QualityFarming::Enabled)
 			return parent::clientCmdCenterprint(%message, %time);
 
-		%message = QualityFarming_parseToolIDString(%message);
+		%lines = getRecordCount(%message);
+		for(%i = 0; %i < %lines; %i++)
+		{
+			%line = getRecord(%message, %i);
+			%line = QualityFarming_parseToolIDString(%line);
+
+			%newMessage = %i == 0 ? %line : %newMessage NL %line;
+		}
 		
-		parent::clientCmdCenterprint(%message, %time);
+		parent::clientCmdCenterprint(%newMessage, %time);
 	}
 
 	function clientCmdMessageBoxOK (%title, %message)
@@ -72,32 +79,28 @@ package QualityFarming
 };
 activatePackage(QualityFarming);
 
-function QualityFarming_parseToolIDString(%string)
+function QualityFarming_parseToolIDString(%line)
 {
-	%lines = getRecordCount(%string);
-	for(%i = 0; %i < %lines; %i++)
+	//check if there is an item id here
+	%pos0 = stripos(%line, "[");
+	%pos1 = stripos(%line, "]");
+	if(%pos0 == -1 || %pos1 == -1 || %pos1 - %pos0 != 4)
+		return %line;
+	
+	%toolID = getSubStr(%line, %pos0 + 1, 3);
+	if(!QualityFarming_veryfiyID(%toolID))
+		return %line;
+	
+	%name = QualityFarming_getToolName(%toolID);
+	if(%name !$= "")
 	{
-		%line = getRecord(%string, %i);
-		%pos0 = stripos(%line, "[");
-		%pos1 = stripos(%line, "]");
-		if(%pos0 == -1 || %pos1 == -1 || %pos1 - %pos0 != 4)
-			continue;
-		
-		%toolID = getSubStr(%line, %pos0 + 1, 3);
-		if(!QualityFarming_veryfiyID(%toolID))
-			continue;
-		
-		%name = QualityFarming_getToolName(%toolID);
-		if(%name !$= "")
-		{
-			%newLine = getSubStr(%line, 0, %pos0 + 1) @ %name @ getSubStr(%line, %pos1, 256);
-			%string = setRecord(%string, %i, %newLine);
-		} else {
-			$QualityFarming::lastSeenToolID = %toolID;
-		}
+		%newLine = getSubStr(%line, 0, %pos0 + 1) @ %name @ getSubStr(%line, %pos1, 256);
+		return %newLine;
+	} else {
+		$QualityFarming::lastSeenToolID = %toolID;
 	}
 
-	return %string;
+	return %line;
 }
 
 function QualityFarming_veryfiyID(%id)
@@ -124,7 +127,7 @@ function QualityFarming_setIDName(%data)
 		%toolID = $QualityFarming::lastSeenToolID;
 	}
 
-	%name = restWords(%data);
+	%name = collapseEscape(restWords(%data));
 	if(!QualityFarming_veryfiyID(%toolID))
 	{
 		newChatHud_AddLine("\c6QualityFarming: Error id is invalid");
