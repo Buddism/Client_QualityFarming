@@ -5,9 +5,9 @@ if(isFunction("execChangedAddFile")) execChangedAddFile(ExpandFilename("./client
 if($Pref::QualityFarming::SavePath $= "")
 	$Pref::QualityFarming::SavePath = "config/client/QualityFarming.cs";
 
-if(isFile($Pref::QualityFarming::SavePath))
+if(!$QualityFarming::Loaded)
 {
-	if($QualityFarming::Loaded)
+	if(isFile($Pref::QualityFarming::SavePath))
 	{
 		exec($Pref::QualityFarming::SavePath);
 	} else {
