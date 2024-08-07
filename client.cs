@@ -171,7 +171,7 @@ function QualityFarming_listBoundIDs(%search)
 	{
 		%toolID = $QualityFarming::ToolDataIndex[%i];
 
-		newChatHud_AddLine("  \c3["@ %toolID @"]:\t\c6 "@ $QualityFarming::ToolData[%toolID, "name"]);
+		newChatHud_AddLine("  <spush><font:courier new:20>\c3["@ %toolID @"]<spop>\c6 "@ $QualityFarming::ToolData[%toolID, "name"]);
 	}
 }
 
