@@ -28,22 +28,33 @@ package QualityFarming
 			return parent::send(%this);
 		
 		// /qf and /fb cuz !fb is used habitually
+		%commandArgs = restWords(%message);
 		switch$(firstWord(%message))
 		{
 			case "/qfHelp" or "/fbHelp":
 				newChatHud_AddLine("\c6Commands:");
 				newChatHud_AddLine("\c3  /qfToggle");
 				newChatHud_AddLine("\c3  /qfName \c7[\c6ID\c7] \c7[\c6Name\c7]");
+				newChatHud_AddLine("\c3  \c0/qfDelete \c7[\c6ID\c7] - delete all tool info for this id");
 
 			case "/qfToggle" or "/fbToggle":
 				$QualityFarming::Enabled = !$QualityFarming::Enabled;
 				newChatHud_AddLine("\c6QualityFarming is now" SPC ($QualityFarming::Enabled ? "\c3Enabled" : "\c0Disabled"));
 
 			case "/qfList" or "/fbList":
-				QualityFarming_listBoundIDs(restWords(%message));
+				QualityFarming_listBoundIDs(%commandArgs);
 
 			case "/qfName" or "/fbName":
-				QualityFarming_setIDName(restWords(%message));
+				QualityFarming_setIDName(%commandArgs);
+
+			case "/qfDelete" or "/fbDelete":
+				%didDeletion = QualityFarming_DeleteToolID(%commandArgs);
+				if(%didDeletion)
+				{
+					newChatHud_AddLine("\c6QualityFarming: \c6Deleted tool tata!");
+				} else {
+					newChatHud_AddLine("\c6QualityFarming: \c0Failed to find tool id!");
+				}
 		}
 
 		return parent::send(%this);
@@ -162,6 +173,24 @@ function QualityFarming_addToolIndex(%toolID)
 
 	$QualityFarming::ToolDataIndex[$QualityFarming::ToolDataCount + 0] = %toolID;
 	$QualityFarming::ToolDataCount++;	
+}
+
+function QualityFarming_deleteToolID(%toolID)
+{
+	%toolIndex = QualityFarming_getToolIndex(%toolID);
+	if(%toolIndex == -1)
+		return false;
+
+	for(%i = %toolIndex; %i < $QualityFarming::ToolDataCount; %i++)
+	{
+		$QualityFarming::ToolDataIndex[%i] = $QualityFarming::ToolDataIndex[%i + 1];
+	}
+
+	$QualityFarming::ToolDataCount--;
+	$QualityFarming::ToolDataIndex[$QualityFarming::ToolDataCount] = "";
+
+	deleteVariables("$QualityFarming::ToolData" @ %toolID @"_*");
+	return true;
 }
 
 function QualityFarming_listBoundIDs(%search)
