@@ -2,8 +2,6 @@
 //buddy development stuff
 if(isFunction("execChangedAddFile")) execChangedAddFile(ExpandFilename("./client.cs"));
 
-exec("./farmingGui.cs");
-
 if($Pref::QualityFarming::SavePath $= "")
 	$Pref::QualityFarming::SavePath = "config/client/QualityFarming.cs";
 
