@@ -32,10 +32,16 @@ package QualityFarming
 		switch$(firstWord(%message))
 		{
 			case "/qfHelp" or "/fbHelp":
-				newChatHud_AddLine("\c6Commands:");
+				newChatHud_AddLine("\c6Commands: ToolID is the number that looks like this [de7]");
 				newChatHud_AddLine("\c3  /qfToggle");
-				newChatHud_AddLine("\c3  /qfName \c7[\c6ID\c7] \c7[\c6Name\c7]");
-				newChatHud_AddLine("\c3  \c0/qfDelete \c7[\c6ID\c7] - delete all tool info for this id");
+				newChatHud_AddLine("\c3  /qfName \c7[\c6ID or 'last'\c7] \c7[\c6Name\c7]");
+				newChatHud_AddLine("\c3  /qfLast \c6- last seen tool id");
+				newChatHud_AddLine("\c3  /qfList \c7[\c61 to show unnamed\c7]");
+				newChatHud_AddLine("\c3  \c0/qfDelete \c7[\c6ID\c7] \c6- delete all tool info for this id");
+
+			case "/qfLast" or "/fbLast":
+				%lastSeenID = $QualityFarming::lastSeenToolID $= "" ? "Unkown" : $QualityFarming::lastSeenToolID;
+				newChatHud_AddLine("\c6QualityFarming: Last seen tool id is [<spush><font:Consolas:" @ QualityFarming_getCorrectFontSize() @ ">\c6"@ %lastSeenID @"<spop>\c6]");
 
 			case "/qfToggle" or "/fbToggle":
 				$QualityFarming::Enabled = !$QualityFarming::Enabled;
@@ -103,12 +109,11 @@ function QualityFarming_parseToolIDString(%line)
 		return %line;
 	
 	%name = QualityFarming_getToolName(%toolID);
+	$QualityFarming::lastSeenToolID = %toolID;
 	if(%name !$= "")
 	{
 		%newLine = getSubStr(%line, 0, %pos0 + 1) @ %name @ getSubStr(%line, %pos1, 256);
 		return %newLine;
-	} else {
-		$QualityFarming::lastSeenToolID = %toolID;
 	}
 
 	return %line;
@@ -193,14 +198,16 @@ function QualityFarming_deleteToolID(%toolID)
 	return true;
 }
 
-function QualityFarming_listBoundIDs(%search)
+function QualityFarming_listBoundIDs(%showUnnamed)
 {
 	newChatHud_AddLine("\c6Total Tool Data Records #" @ $QualityFarming::ToolDataCount + 0);
 	for(%i = 0; %i < $QualityFarming::ToolDataCount; %i++)
 	{
 		%toolID = $QualityFarming::ToolDataIndex[%i];
-
-		newChatHud_AddLine("  <spush><font:courier new:20>\c3["@ %toolID @"]<spop>\c6 "@ $QualityFarming::ToolData[%toolID, "name"]);
+		if(!%showUnnamed && $QualityFarming::ToolData[%toolID, "name"] $= "")
+			continue;
+		
+		newChatHud_AddLine("  <spush><font:Consolas:" @ QualityFarming_getCorrectFontSize() @ ">\c3["@ %toolID @"]<spop>\c6 "@ $QualityFarming::ToolData[%toolID, "name"]);
 	}
 }
 
@@ -217,3 +224,8 @@ function QualityFarming_save()
 }
 
 
+function QualityFarming_getCorrectFontSize()
+{
+	//kinda dumb
+	return NMH_Type.profile.fontSize;
+}
