@@ -15,8 +15,6 @@ if(!$QualityFarming::Loaded)
 	}
 
 	$QualityFarming::Loaded = true;
-	if(!isEventPending($QualityFarmingAutoSave))
-		QualityFarming_save();
 }
 
 package QualityFarming
@@ -63,7 +61,7 @@ package QualityFarming
 				}
 		}
 
-		return parent::send(%this);
+		QualityFarming_save();
 	}
 
 	function clientCmdCenterprint(%message, %time)
@@ -215,12 +213,6 @@ function QualityFarming_save()
 {
 	$QualityFarming::lastSaveTime = getDateTime();
 	export("$QualityFarming::*", $Pref::QualityFarming::SavePath);
-
-	if(!isObject(serverConnection))
-		return;
-	
-	cancel($QualityFarmingAutoSave);
-	$QualityFarmingAutoSave = schedule(30000, 0, QualityFarming_save);
 }
 
 
