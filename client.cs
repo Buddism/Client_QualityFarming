@@ -15,6 +15,7 @@ if(!$QualityFarming::Loaded)
 	}
 
 	$QualityFarming::Loaded = true;
+	QualityFarming_save();
 }
 
 package QualityFarming
@@ -33,6 +34,7 @@ package QualityFarming
 				newChatHud_AddLine("\c6Commands: ToolID is the number that looks like this [de7]");
 				newChatHud_AddLine("\c3  /qfToggle");
 				newChatHud_AddLine("\c3  /qfName \c7[\c6ID or 'last'\c7] \c7[\c6Name\c7]");
+				newChatHud_AddLine("\c3  /qfNote \c7[\c6ID or 'last'\c7] \c7[\Note\c7] \c6- adds a note to the item to show in /qfList");
 				newChatHud_AddLine("\c3  /qfLast \c6- last seen tool id");
 				newChatHud_AddLine("\c3  /qfList \c7[\c61 to show unnamed\c7]");
 				newChatHud_AddLine("\c3  \c0/qfDelete \c7[\c6ID\c7] \c6- delete all tool info for this id");
@@ -51,6 +53,9 @@ package QualityFarming
 			case "/qfName" or "/fbName":
 				QualityFarming_setIDName(%commandArgs);
 
+			case "/qfNote" or "/fbNote":
+				QualityFarming_setIDNote(%commandArgs);
+
 			case "/qfDelete" or "/fbDelete":
 				%didDeletion = QualityFarming_DeleteToolID(%commandArgs);
 				if(%didDeletion)
@@ -59,6 +64,9 @@ package QualityFarming
 				} else {
 					newChatHud_AddLine("\c6QualityFarming: \c0Failed to find tool id!");
 				}
+
+			default:
+				return parent::send(%this);
 		}
 
 		QualityFarming_save();
@@ -155,6 +163,30 @@ function QualityFarming_setIDName(%data)
 	$QualityFarming::ToolData[%toolID, "name"] = %name;
 	newChatHud_AddLine("\c6QualityFarming: Named ["@ %toolID @"] to '"@ %name @"'");
 }
+
+function QualityFarming_setIDNote(%data)
+{
+	%toolID = getWord(%data, 0);
+	if(%toolID $= "last")
+	{
+		%toolID = $QualityFarming::lastSeenToolID;
+	}
+
+	%note = collapseEscape(restWords(%data));
+	if(!QualityFarming_veryfiyID(%toolID))
+	{
+		newChatHud_AddLine("\c6QualityFarming: Error id is invalid");
+		return;
+	}
+	
+	%index = QualityFarming_getToolIndex(%toolID);
+	if(%index == -1)
+		QualityFarming_addToolIndex(%toolID);
+
+	$QualityFarming::ToolData[%toolID, "note"] = %note;
+	newChatHud_AddLine("\c6QualityFarming: Noted ["@ %toolID @"] with '"@ %note @"'");
+}
+
 function QualityFarming_getToolIndex(%testToolID)
 {
 	for(%i = 0; %i < $QualityFarming::ToolDataCount; %i++)
@@ -198,14 +230,20 @@ function QualityFarming_deleteToolID(%toolID)
 
 function QualityFarming_listBoundIDs(%showUnnamed)
 {
+	%showUnnamed = %showUnnamed !$= "";
 	newChatHud_AddLine("\c6Total Tool Data Records #" @ $QualityFarming::ToolDataCount + 0);
 	for(%i = 0; %i < $QualityFarming::ToolDataCount; %i++)
 	{
 		%toolID = $QualityFarming::ToolDataIndex[%i];
-		if(!%showUnnamed && $QualityFarming::ToolData[%toolID, "name"] $= "")
+		%name = $QualityFarming::ToolData[%toolID, "name"];
+		if(!%showUnnamed && %name $= "")
 			continue;
 		
-		newChatHud_AddLine("  <spush><font:Consolas:" @ QualityFarming_getCorrectFontSize() @ ">\c3["@ %toolID @"]<spop>\c6 "@ $QualityFarming::ToolData[%toolID, "name"]);
+		if(%name $= "")
+			%name = "<color:CCCCCC>[UNNAMED]";
+
+		%note = $QualityFarming::ToolData[%toolID, "Note"];
+		newChatHud_AddLine("  <tab:200><spush><font:Consolas:" @ QualityFarming_getCorrectFontSize() @ ">\c3["@ %toolID @"]<spop>\c6 "@ %name @ "\t<color:999999>" SPC %note);
 	}
 }
 
