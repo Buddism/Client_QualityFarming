@@ -46,30 +46,32 @@ package QualityFarming
 			case "/qfToggle" or "/fbToggle":
 				$QualityFarming::Enabled = !$QualityFarming::Enabled;
 				newChatHud_AddLine("\c6QualityFarming is now" SPC ($QualityFarming::Enabled ? "\c3Enabled" : "\c0Disabled"));
+				%doFarmingSave = true;
 
 			case "/qfList" or "/fbList":
 				QualityFarming_listBoundIDs(%commandArgs);
 
 			case "/qfName" or "/fbName":
 				QualityFarming_setIDName(%commandArgs);
+				%doFarmingSave = true;
 
 			case "/qfNote" or "/fbNote":
 				QualityFarming_setIDNote(%commandArgs);
+				%doFarmingSave = true;
 
 			case "/qfDelete" or "/fbDelete":
 				%didDeletion = QualityFarming_DeleteToolID(%commandArgs);
 				if(%didDeletion)
 				{
 					newChatHud_AddLine("\c6QualityFarming: \c6Deleted tool tata!");
+					%doFarmingSave = true;
 				} else {
 					newChatHud_AddLine("\c6QualityFarming: \c0Failed to find tool id!");
 				}
-
-			default:
-				return parent::send(%this);
 		}
 
 		QualityFarming_save();
+		return parent::send(%this);
 	}
 
 	function clientCmdCenterprint(%message, %time)
