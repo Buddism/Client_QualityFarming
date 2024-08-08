@@ -33,7 +33,7 @@ package QualityFarming
 			case "/qfHelp" or "/fbHelp":
 				newChatHud_AddLine("\c6Commands: ToolID is the number that looks like this [de7]");
 				newChatHud_AddLine("\c3  /qfToggle");
-				newChatHud_AddLine("\c3  /qfName \c7[\c6ID or 'last'\c7] \c7[\c6Name\c7]");
+				newChatHud_AddLine("\c3  /qfName \c7[\c6ID or 'last'\c7] \c7[\c6Name, prefix with = to replace the entire name\c7]");
 				newChatHud_AddLine("\c3  /qfNote \c7[\c6ID or 'last'\c7] \c7[\Note\c7] \c6- adds a note to the item to show in /qfList");
 				newChatHud_AddLine("\c3  /qfLast \c6- last seen tool id");
 				newChatHud_AddLine("\c3  /qfList \c7[\c61 to show unnamed\c7]");
@@ -79,6 +79,8 @@ package QualityFarming
 		if(!$QualityFarming::Enabled)
 			return parent::clientCmdCenterprint(%message, %time);
 
+		//records dont detect <br>
+		%message = strreplace(%message, "<br>", "\n");
 		%lines = getRecordCount(%message);
 		for(%i = 0; %i < %lines; %i++)
 		{
@@ -120,6 +122,13 @@ function QualityFarming_parseToolIDString(%line)
 	$QualityFarming::lastSeenToolID = %toolID;
 	if(%name !$= "")
 	{
+		if(getSubStr(%name, 0, 1) $= "=")
+		{
+			//not an extremely reliable way to retrieve the ml but it works for now
+			%mlString = strreplace(%line, StripMLControlChars(%line), "");
+			return %mlString @ getSubStr(%name, 1, 256);
+		}
+		
 		%newLine = getSubStr(%line, 0, %pos0 + 1) @ %name @ getSubStr(%line, %pos1, 256);
 		return %newLine;
 	}
