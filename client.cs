@@ -63,7 +63,7 @@ package QualityFarming
 				%didDeletion = QualityFarming_DeleteToolID(%commandArgs);
 				if(%didDeletion)
 				{
-					newChatHud_AddLine("\c6QualityFarming: \c6Deleted tool tata!");
+					newChatHud_AddLine("\c6QualityFarming: \c6Deleted tool data for ["@ %commandArgs @ "]!");
 					%doFarmingSave = true;
 				} else {
 					newChatHud_AddLine("\c6QualityFarming: \c0Failed to find tool id!");
