@@ -115,7 +115,7 @@ function QualityFarming_parseToolIDString(%line)
 		return %line;
 	
 	%toolID = getSubStr(%line, %pos0 + 1, 3);
-	if(!QualityFarming_veryfiyID(%toolID))
+	if(!QualityFarming_verifyID(%toolID))
 		return %line;
 	
 	%name = QualityFarming_getToolName(%toolID);
@@ -136,12 +136,12 @@ function QualityFarming_parseToolIDString(%line)
 	return %line;
 }
 
-function QualityFarming_veryfiyID(%id)
+function QualityFarming_verifyID(%id)
 {
 	if(strlen(%id) != 3)
 		return false;
 
-	if(strlen(stripChars(strlwr(%id), "abcdefghijklmnopqrstuvwxyz" @ "0123456789")) != 0)
+	if(strlen(stripChars(strlwr(%id), "abcdef" @ "0123456789")) != 0)
 		return false;
 	
 	return true;
@@ -161,7 +161,7 @@ function QualityFarming_setIDName(%data)
 	}
 
 	%name = collapseEscape(restWords(%data));
-	if(!QualityFarming_veryfiyID(%toolID))
+	if(!QualityFarming_verifyID(%toolID))
 	{
 		newChatHud_AddLine("\c6QualityFarming: Error id is invalid");
 		return;
@@ -184,7 +184,7 @@ function QualityFarming_setIDNote(%data)
 	}
 
 	%note = collapseEscape(restWords(%data));
-	if(!QualityFarming_veryfiyID(%toolID))
+	if(!QualityFarming_verifyID(%toolID))
 	{
 		newChatHud_AddLine("\c6QualityFarming: Error id is invalid");
 		return;
